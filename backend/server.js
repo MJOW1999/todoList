@@ -2,16 +2,20 @@ require("dotenv").config();
 const { connectToDb, getDb } = require("./config/db");
 
 const express = require("express");
-const routes = require("./routes/tasks");
+const taskRoutes = require("./routes/tasks");
 const { ObjectId } = require("mongodb");
 
 // express app
 const app = express();
-
+app.use((req, res, next) => {
+  console.log(req.path, req.method);
+  next();
+});
 // initialise middleware
 app.use(express.json());
 
 // connect to database
+
 let db;
 
 connectToDb((err) => {
@@ -110,5 +114,114 @@ app.delete("/tasks/:id", (req, res) => {
   }
 });
 
+// Filter tasks by status
+app.get("/tasks/status/:status", (req, res) => {
+  let tasks = [];
+
+  db.collection("tasks")
+    .find({ status: req.params.status })
+    .forEach((task) => tasks.push(task))
+    .then(() => {
+      if (tasks != []) {
+        res.status(200).json(tasks);
+      } else {
+        res.status(200).json({
+          message:
+            "Successful search. However no tasks of that status were found",
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({ error: "No task of that status found" });
+    });
+});
+
+// Create a project
+app.post("/projects", (req, res) => {
+  const project = req.body;
+
+  db.collection("projects")
+    .insertOne(project)
+    .then((result) => {
+      res.status(201).json(result);
+    })
+    .catch((err) => {
+      res.status(500).json({ err: "Could not create new project" });
+    });
+});
+
+// Show all projects
+app.get("/projects", (req, res) => {
+  let projects = [];
+  db.collection("projects")
+    .find()
+    .sort()
+    .forEach((project) => projects.push(project))
+    .then(() => res.status(200).json(projects))
+    .catch(() => {
+      res.status(500).json({ error: "Could not fetch projects" });
+    });
+});
+
+// Edit a project
+app.patch("/projects/:id", (req, res) => {
+  const updateProject = req.body;
+  // Check project exists to be edited
+  if (ObjectId.isValid(req.params.id)) {
+    db.collection("projects")
+      .updateOne({ _id: new ObjectId(req.params.id) }, { $set: updateProject })
+      .then((result) => {
+        res.status(200).json(result);
+      })
+      .catch((err) => {
+        res.status(500).json({ error: "Could not update the project" });
+      });
+  } else {
+    res
+      .status(500)
+      .json({ error: "Project could not be updated, as it doesn't exist" });
+  }
+});
+
+// Delete a project
+app.delete("/projects/:id", (req, res) => {
+  // Check if the task exists
+  if (ObjectId.isValid(req.params.id)) {
+    db.collection("projects")
+      .deleteOne({ _id: new ObjectId(req.params.id) })
+      .then((result) => {
+        res.status(201).json(result);
+      })
+      .catch((err) => {
+        res.status(500).json({ error: "Could not delete the project" });
+      });
+  } else {
+    res
+      .status(500)
+      .json({ error: "Project could not be deleted, as it doesn't exist" });
+  }
+});
+
+// Filter by project name
+app.get("/projects/:name", (req, res) => {
+  let names = [];
+
+  db.collection("projects")
+    .find({ name: req.params.name })
+    .forEach((project) => names.push(project))
+    .then(() => {
+      if (projects != []) {
+        res.status(200).json(projects);
+      } else {
+        res.status(200).json({
+          message: "Successful search. However no projects of that name found",
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({ error: "No project of that name found" });
+    });
+});
+
 // routes
-app.use("/tasks", routes);
+app.use("/tasks", taskRoutes);

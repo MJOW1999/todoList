@@ -1,10 +1,9 @@
 const express = require("express");
+const { getTasks } = require("../controllers/tasksController");
 const router = express.Router();
 
 // All tasks
-router.get("/", (req, res) => {
-  res.json({ message: "GET All tasks" });
-});
+router.get("/tasks", getTasks);
 
 // Get a single task
 router.get("/:id", (req, res) => {
