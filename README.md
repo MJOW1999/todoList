@@ -22,6 +22,11 @@
 
 - Create backend folder with and `package.json` file with `npm init -y`.
 - Install `express`, `nodemon`, `mongodb` and `dotenv`
+- Download and install mongodb locally
+- Create `todoList` database with a `tasks` collection
+- Connect local database in `db.js` file
+- Create a `server.js` file which initialises the express app, connects to the database and performs simple `GET` and `POST` requests
+- Create `routes/tasks.js` which has intitial routes for the to do tasks.
 
 In Progress ...
 
