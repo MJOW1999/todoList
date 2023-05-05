@@ -1,5 +1,4 @@
 const express = require("express");
-
 const router = express.Router();
 
 // All tasks
@@ -12,17 +11,17 @@ router.get("/:id", (req, res) => {
   res.json({ message: "GET a single task" });
 });
 
-// POST
+// Create a new task
 router.post("/", (req, res) => {
   res.json({ message: "POST a new task" });
 });
 
-// DELETE
+// Delete a task
 router.delete("/:id", (req, res) => {
   res.json({ message: "DELETE a task" });
 });
 
-// PATCH
+// Update a task
 router.patch("/:id", (req, res) => {
   res.json({ message: "Update a task" });
 });
